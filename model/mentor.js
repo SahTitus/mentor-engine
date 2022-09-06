@@ -22,6 +22,6 @@ const mentorSchema = mongoose.Schema({
   },
 });
 
-const Mentor = mongoose.model("Mentor", mentorSchema);
+export default mongoose.model("Mentor", mentorSchema);
 
-export default Mentor;
+
