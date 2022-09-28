@@ -5,7 +5,14 @@ const userSchema = mongoose.Schema({
   email: { type: "String", required: true },
   password: { type: "String", required: true },
   isMentor: Boolean,
+  mentors: {
+    type: [String],
+    default: [],
+  },
   id: { type: "String" },
+  image: String,
+  mentorshipName: String,
+  mentorshipDp: String,
 });
 
 export default mongoose.model("User", userSchema);

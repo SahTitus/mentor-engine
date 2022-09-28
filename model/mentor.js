@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const mentorSchema = mongoose.Schema({
   email: String,
-  fullName: String,
+  name: String,
   religion: String,
   image: String,
   dbirth: String,
@@ -11,7 +11,12 @@ const mentorSchema = mongoose.Schema({
   fieldExp: String,
   password: String, 
   isMentor: Boolean,
-  likes: {
+  userId: String,
+  mentees: {
+    type: [String],
+    default: [],
+  },
+  pendingMentees: {
     type: [String],
     default: [],
   },

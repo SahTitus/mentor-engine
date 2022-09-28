@@ -22,26 +22,41 @@ export const getMentor = async (req, res) => {
   res.json(mentor);
 };
 
+export const getMentees = async (req, res) => {
+  const mentorId = req?.params?.id;
+
+  if (!mentorId) {
+    return res.status(400).json({ message: "Mentor ID is required." });
+  }
+  const mentor = await Mentor.findOne({ _id: mentorId }).exec();
+  if (!mentor) {
+    return res.status(400).json({ message: `Mentor ID ${mentorId} not found` });
+  }
+
+  res.json(mentor);
+};
+
 export const createMentor = async (req, res) => {
   const mentor = req.body;
   try {
     if (!mongoose.Types.ObjectId.isValid(mentor.id))
-    return res.status(400).send({ message: `User ID ${id} not found` });
+      return res.status(400).send({ message: `User ID ${id} not found` });
 
     const user = await User.findOne({ _id: mentor.id }).exec();
 
     const result = await Mentor.create({
       ...mentor,
+      userId: user._id,
       creator: req.userId,
+      pendingMentees:[],
       createdAt: new Date().toISOString(),
     });
 
-user.isMentor = true
+    user.mentorshipName = mentor.name;
+    user.mentorshipDp = mentor.image;
+    user.isMentor = true;
 
-
-  const updatedUser = await User.findByIdAndUpdate(mentor.id, user, { new: true });
-  console.log(updatedUser)
-
+    await User.findByIdAndUpdate(mentor.id, user, { new: true });
 
     res.status(201).json(result);
   } catch (err) {
@@ -52,15 +67,14 @@ user.isMentor = true
 export const updateMentor = async (req, res) => {
   const { id } = req.params;
   const mentorBody = req.body;
+  console.log(id)
 
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(400).send({ message: `Mentor ID ${id} not found` });
 
-  const mentor = await Mentor.findOne({ _id: id }).exec();
+  const updatedMentor = await Mentor.findByIdAndUpdate(id, mentorBody, {new: true});
 
-  if (mentor) mentor = mentorBody;
-
-  const updatedMentor = await Mentor.save();
+  console.log(updatedMentor)
 
   res.json(updatedMentor);
 };
@@ -69,7 +83,7 @@ export const deleteMentor = async (req, res) => {
   const { id } = req.params;
   console.log("Eko o");
 
-   await Mentor.findOne({ _id: id }).exec();
+  await Mentor.findOne({ _id: id }).exec();
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(400).send({ message: `mentor ID ${id} not found` });
 
@@ -77,8 +91,8 @@ export const deleteMentor = async (req, res) => {
   res.json({ message: "mentor deleted successfully" });
 };
 
-export const likeMentor = async (req, res) => {
-  const { id } = req.params;
+export const disConnect = async (req, res) => {
+  const {id, menteeId } = req.body;
 
   if (!req.userId) return res.json({ message: "Unauthenticated" });
 
@@ -86,16 +100,26 @@ export const likeMentor = async (req, res) => {
     return res.status(400).send({ message: `Mentor ID ${id} not found` });
 
   const mentor = await Mentor.findById(id);
+  const mentee = await User.findById(menteeId);
 
-  const index = Mentor.likes.findIndex((id) => id === String(req.userId));
+  const index = mentor.mentees.findIndex((id) => id === menteeId);
 
   if (index === -1) {
-    Mentor.likes.push(req.userId);
+    mentor.mentees.push(req.userId);
+    mentee.mentors.push(id);
   } else {
-    Mentor.likes = Mentor.likes.filter((id) => id !== String(req.userId));
+    mentor.mentees = mentor.mentees.filter(
+      (menteId) => menteId !== menteeId
+    );
+    mentee.mentors = mentee.mentors.filter((id) => id !== id);
   }
 
-  const updatedMentor = await Mentor.findByIdAndUpdate(id, mentor, { new: true });
+  const updatedMentor = await Mentor.findByIdAndUpdate(id, mentor, {
+    new: true,
+  });
+  const updatedMentee = await User.findByIdAndUpdate(menteeId, mentee, {
+    new: true,
+  });
 
-  res.json(updatedMentor);
+  res.json({updatedMentee, updatedMentor});
 };
