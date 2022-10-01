@@ -2,6 +2,7 @@ import Room from "../model/room.js";
 import Mentor from "../model/mentor.js";
 import Message from "../model/message.js";
 import User from "../model/user.js";
+import mongoose from "mongoose";
 
 export const getMessages = async (req, res) => {
   const roomId = req.params.id
@@ -15,15 +16,12 @@ export const getMessages = async (req, res) => {
 
     return res.status(200).json(messages);
   } catch (err) {
-    // return res.status(500).json({ error: "Internal Server Error" });
-    console.log(err.message);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 export const sendMessage = async (req, res) => {
-  //   if (!req.body.message) return res.json({ error: "Type ..." });
-
-  const { senderId, recipientId, type, message, roomDbId } = req.body.chatData;
+  const { senderId, recipientId, type, message, roomDbId, senderName, mentor } = req.body.chatData;
   const { id } = req.params;
   const roomId = id;
 
@@ -56,7 +54,7 @@ export const sendMessage = async (req, res) => {
       image: "",
       senderId: senderId,
       recipientId: recipientId,
-      // senderName,
+      senderName: senderName,
       roomId: roomId,
     });
 
@@ -69,7 +67,17 @@ export const sendMessage = async (req, res) => {
 
     return res.status(200).json(newMessage);
   } catch (err) {
-    // return res.status(500).json({ error: "Internal Server Error" });
-    console.log(err.message);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
+};
+
+export const deleteMessage = async (req, res) => {
+  const { id } = req.params;
+
+  const message = await Message.findOne({ _id: id }).exec();
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(400).send({ message: `message ID ${id} not found` });
+
+  await message.deleteOne({ _id: id });
+  res.json({ message: "message deleted successfully" });
 };

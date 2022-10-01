@@ -1,15 +1,10 @@
 import Room from "../model/room.js";
+import Mentor from "../model/mentor.js";
+import mongoose from "mongoose";
 
 export const getRooms = async (req, res) => {
   //All the rooms that includes the current user's id
   const { id } = req.params;
-
-  // const chatRooms = await Room.find({
-  //   users: {
-  //     $in: [id],
-  //   },
-  // }).sort({ updatedAt: -1 });
-  // .populate("users latestMessage");
 
   const chatRooms = await Room.find({
     users: {
@@ -26,7 +21,7 @@ export const getRooms = async (req, res) => {
 export const getRoom = async (req, res) => {
   const { id } = req.params;
 
-  const chatRoom = await Room.findOne({roomId: id});
+  const chatRoom = await Room.findOne({ roomId: id });
 
   if (!chatRoom) {
     return res.status(200).send({ message: `No data` });
@@ -36,18 +31,23 @@ export const getRoom = async (req, res) => {
 };
 
 export const createRoom = async (req, res) => {
-  const { mentorId, image, groupName } = req.body;
+  const { mentorId, mentorshipId, image, groupName } = req.body;
 
   const roomId = mentorId + "-" + groupName;
   const roomExists = await Room.findOne({
     roomId: roomId,
   });
+  const mentor = await Mentor.findOne({
+    _id: mentorshipId,
+  });
 
   if (roomExists)
     return res.status(400).json({ message: "Room already exists" });
+  const members = mentor.mentees;
+  members.push(mentorId);
 
   const room = await Room.create({
-    users: [mentorId],
+    users: members,
     roomId: roomId,
     roomName: groupName,
     users__profile: [],
@@ -62,33 +62,33 @@ export const createRoom = async (req, res) => {
   res.status(200).json(room);
 };
 
-// export const getRooms = async (req, res) => {
-//   const { id } = req.params;
+export const deleteRoom = async (req, res) => {
+  const { id } = req.params;
 
-//   const chatRoom = await Room.find({
-//     users: {
-//       $in: [id],
-//     },
-//   }).sort({ updatedAt: -1 });
-//   // .populate("users latestMessage");
+  if (!id) return res.status(400).send({ room: `Room ID is required` });
 
-//   console.log(chatRoom);
+  const room = await Room.findOne({ roomId: id }).exec();
 
-//   if (!chatRoom) {
-//     return res.status(400).send({ message: `chatRooms ID ${id} not found` });
-//   }
+  await room.deleteOne({ _id: id });
+  res.json({ room: "room deleted successfully" });
+};
 
-//   // chatRoom.chatRooms.push({
-//   //   ...chatData,
-//   //   id: Math.floor(Math.random() * 100) * 149126400,
-//   //   createdAt: new Date().toISOString(),
-//   // });
+export const updateRoom = async (req, res) => {
+  const { id } = req.params;
+  const body = req.body;
+  const room = await Room.findOne({ _id: id }).exec();
 
-//   const updatedChat = await Room.findByIdAndUpdate(chatRoom._id, chatRoom, {
-//     new: true,
-//   });
+  room.roomName = body.roomName;
+  room.image = body.image;
+  room.roomId = `${id}-${room.roomName}`;
 
-//   console.log(updatedChat);
+  if (!room) {
+    return res.status(400).send({ message: `room ID ${id} not found` });
+  }
 
-//   res.json(updatedChat);
-// };
+  const updatedRoom = await Room.findByIdAndUpdate(id, room, {
+    new: true,
+  });
+
+  res.json(updatedRoom);
+};

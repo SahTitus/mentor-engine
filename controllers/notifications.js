@@ -1,12 +1,11 @@
 import Notification from "../model/notification.js";
 import Mentor from "../model/mentor.js";
 import User from "../model/user.js";
+import Room from "../model/room.js";
 import mongoose from "mongoose";
 
 export const getNotifications = async (req, res) => {
   const { id } = req.params;
-  //   const notifications = await Notification.find();
-  console.log(id);
 
   const notifications = await Notification.find({
     users: {
@@ -22,7 +21,6 @@ export const getNotifications = async (req, res) => {
 
 export const deleteRequest = async (req, res) => {
   const { id } = req.params;
-  console.log("Eko o");
 
   const notification = await Notification.findOne({ _id: id }).exec();
   if (!mongoose.Types.ObjectId.isValid(id))
@@ -36,7 +34,6 @@ export const sendRequest = async (req, res) => {
   const notification = req.body;
   const id = notification.mentorId;
   const userId = notification.requestId;
-  console.log(notification);
 
   const mentor = await Mentor.findById(id);
 
@@ -89,18 +86,29 @@ export const cancelRequest = async (req, res) => {
 };
 
 export const acceptRequest = async (req, res) => {
-  const { mentorId, menteeId, notificationId } = req.body;
-  console.log(req.body);
+  const { mentorId, adminId, menteeId, notificationId } = req.body;
 
   const mentor = await Mentor.findById(mentorId);
   const mentee = await User.findById(menteeId);
   const notification = await Notification.findById(notificationId);
+  const room = await Room.findOne({adminId: adminId});
+
+
+  const mentorRooms = await Room.find({
+    adminId: {
+      $all: [adminId],
+    },
+  });
+
+
+
 
   const index = mentor.mentees.findIndex((id) => id === String(menteeId));
 
   if (index === -1) {
     mentor.mentees.push(menteeId);
     mentee.mentors.push(mentorId);
+    mentorRooms.map(room => room.users.push(menteeId))
     mentor.pendingMentees = mentor.pendingMentees.filter(
       (id) => id !== String(menteeId)
     );
@@ -114,6 +122,12 @@ export const acceptRequest = async (req, res) => {
   const updatedMentor = await Mentor.findByIdAndUpdate(mentorId, mentor, {
     new: true,
   });
+
+  mentorRooms.map(async(room )=> {
+    await Room.findByIdAndUpdate(room._id, room, {
+      new: true,
+    });
+  })
   await User.findByIdAndUpdate(menteeId, mentee, {
     new: true,
   });

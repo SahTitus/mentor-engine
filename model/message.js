@@ -9,9 +9,13 @@ const messageSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    senderName: {
+        type: String,
+
+    },
     recipientId: {
         type: String,
-        required: true,
+
     },
     roomId: {
         type: String,

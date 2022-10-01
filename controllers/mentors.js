@@ -10,6 +10,21 @@ export const getMentors = async (req, res) => {
   res.json(mentors);
 };
 
+export const getMentorsBySearch = async (req, res) => {
+  const { searchQuery } = req.query;
+
+try {
+  const name = new RegExp(searchQuery, "i");
+  const mentors = await Mentor.find({name});
+
+  res.json(mentors);
+} catch (error) {
+  return res.status(400).json({ message: error.message});
+}
+
+
+};
+
 export const getMentor = async (req, res) => {
   const mentorId = req?.params?.id;
   if (!mentorId) {
@@ -67,21 +82,17 @@ export const createMentor = async (req, res) => {
 export const updateMentor = async (req, res) => {
   const { id } = req.params;
   const mentorBody = req.body;
-  console.log(id)
 
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(400).send({ message: `Mentor ID ${id} not found` });
 
   const updatedMentor = await Mentor.findByIdAndUpdate(id, mentorBody, {new: true});
 
-  console.log(updatedMentor)
-
   res.json(updatedMentor);
 };
 
 export const deleteMentor = async (req, res) => {
   const { id } = req.params;
-  console.log("Eko o");
 
   await Mentor.findOne({ _id: id }).exec();
   if (!mongoose.Types.ObjectId.isValid(id))

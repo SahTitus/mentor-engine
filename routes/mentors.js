@@ -7,12 +7,14 @@ import {
   updateMentor,
   disConnect,
   getMentees,
+  getMentorsBySearch,
 } from "../controllers/mentors.js";
 import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
 router.route("/").get(getMentors);
+router.route("/search").get(getMentorsBySearch);
 router.route("/").post(createMentor);
 router.route("/:id").delete(deleteMentor);
 router.route("/:id/update").patch(updateMentor);
