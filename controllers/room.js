@@ -37,17 +37,12 @@ export const createRoom = async (req, res) => {
   const roomExists = await Room.findOne({
     roomId: roomId,
   });
-  const mentor = await Mentor.findOne({
-    _id: mentorshipId,
-  });
 
   if (roomExists)
     return res.status(400).json({ message: "Room already exists" });
-  const members = mentor.mentees;
-  members.push(mentorId);
 
   const room = await Room.create({
-    users: members,
+    users: [mentorId],
     roomId: roomId,
     roomName: groupName,
     users__profile: [],
@@ -60,6 +55,32 @@ export const createRoom = async (req, res) => {
   });
 
   res.status(200).json(room);
+};
+
+export const memberAction = async (req, res) => {
+  const { roomId, memberId, addId } = req.body;
+
+  if (!roomId) return res.status(400).send({ message: `Room ID is required` });
+
+  const room = await Room.findById(roomId);
+
+  const index = room.users.findIndex((id) => id === memberId);
+
+  if (memberId && index !== -1) {
+    room.users = room.users.filter((id) => id !== memberId);
+  }
+
+  const addIndex = room.users.findIndex((id) => id === addId);
+
+  if (addId && addIndex === -1) {
+    room.users.push(addId);
+  }
+
+  const updatedRoom = await Room.findByIdAndUpdate(roomId, room, {
+    new: true,
+  });
+
+  res.json(updatedRoom);
 };
 
 export const deleteRoom = async (req, res) => {

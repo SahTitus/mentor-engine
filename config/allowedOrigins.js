@@ -1,5 +1,6 @@
  const allowedOrigins = [
-	"https://mentor-sigma.vercel.app"
+	"https://mentor-sigma.vercel.app",
+	"http://localhost:3000"
 
 ];
 

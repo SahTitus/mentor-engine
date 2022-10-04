@@ -38,6 +38,6 @@ app.use("/messages", messagesRoutes);
 app.use("/notifications", notificationsRoutes);
 
 mongoose.connection.once("open", () => {
-  console.log("Connected to MongoDB 😆");
+  console.log("Connected ");
   app.listen(PORT, () => console.log(`App is running on PORT ${PORT}`));
 });
