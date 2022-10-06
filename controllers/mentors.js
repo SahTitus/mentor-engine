@@ -53,6 +53,7 @@ export const getMentees = async (req, res) => {
 
 export const createMentor = async (req, res) => {
   const mentor = req.body;
+
   try {
     if (!mongoose.Types.ObjectId.isValid(mentor.id))
       return res.status(400).send({ message: `User ID ${id} not found` });
