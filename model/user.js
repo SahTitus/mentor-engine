@@ -12,7 +12,6 @@ const userSchema = mongoose.Schema({
   id: { type: "String" },
   image: {
     type: String,
-    default: null,
   },
   mentorshipName: String,
   mentorshipDp: String,
