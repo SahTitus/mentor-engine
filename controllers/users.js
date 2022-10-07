@@ -108,6 +108,12 @@ export const googleAuth = async (req, res) => {
         mentorshipName: "",
         password: "1321334578222",
         name: displayName,
+        department: "",
+        age: "",
+        religion: "",
+        program: "",
+        rationale: "",
+
       });
 
       const token = jwt.sign({ email: result.email, id: result._id }, secret, {

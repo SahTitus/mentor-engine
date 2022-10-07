@@ -10,9 +10,17 @@ const userSchema = mongoose.Schema({
     default: [],
   },
   id: { type: "String" },
-  image: String,
+  image: {
+    type: String,
+    default: null,
+  },
   mentorshipName: String,
   mentorshipDp: String,
+  department: String,
+  age: String,
+  religion: String,
+  program: String,
+  rationale: String,
 });
 
 export default mongoose.model("User", userSchema);
