@@ -1,5 +1,5 @@
  const allowedOrigins = [
-	"https://mentor-sigma.vercel.app",
+	"https://rabbitchat-mentorship.netlify.app",
 	"http://localhost:3000"
 
 ];

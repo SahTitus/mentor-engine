@@ -21,7 +21,7 @@ export const getMessages = async (req, res) => {
 };
 
 export const sendMessage = async (req, res) => {
-  const { senderId, recipientId, type, message, roomDbId, senderName, mentor } = req.body.chatData;
+  const { senderId, recipientId, type, message, roomDbId, senderName} = req.body.chatData;
   const { id } = req.params;
   const roomId = id;
 
